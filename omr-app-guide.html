@@ -1,0 +1,2436 @@
+<!doctype html>
+<html lang="km">
+<script src="chrome-extension://pphgdbgldlmicfdkhondlafkiomnelnk/content/location/location.js"
+    id="pphgdbgldlmicfdkhondlafkiomnelnk"></script>
+<script src="chrome-extension://pphgdbgldlmicfdkhondlafkiomnelnk/libs/extend-native-history-api.js"></script>
+<script src="chrome-extension://pphgdbgldlmicfdkhondlafkiomnelnk/libs/requests.js"></script>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OMR • របៀបចុះឈ្មោះ និងកម្ម៉ង់អាហារ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy:wght@300;400;700&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #236c32;
+            --deep: #174b29;
+            --lime: #eff6eb;
+            --yellow: #ffda26;
+            --ink: #20392d;
+            --muted: #5e6e65;
+            --line: #dce6dc;
+            --paper: #f7f9f4
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Kantumruy', 'Khmer OS Siemreap', 'Khmer OS', system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.9
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 36px
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0
+        }
+
+        h1 {
+            font-size: clamp(27px, 3.4vw, 42px);
+            line-height: 1.65;
+            font-weight: 700;
+            max-width: 820px
+        }
+
+        h2 {
+            font-size: 23px;
+            line-height: 1.8
+        }
+
+        h3 {
+            font-size: 19px;
+            line-height: 1.8
+        }
+
+        p {
+            color: var(--muted)
+        }
+
+        svg {
+            width: 27px;
+            height: 27px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0
+        }
+
+        .sprites {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden
+        }
+
+        .hero {
+            background: var(--deep);
+            color: white;
+            border-radius: 28px;
+            padding: 36px 40px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 6px solid var(--yellow)
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 25px
+        }
+
+        .mark {
+            background: var(--yellow);
+            color: var(--deep);
+            font: 800 19px/1 system-ui;
+            letter-spacing: -1px;
+            border-radius: 12px;
+            padding: 15px 10px
+        }
+
+        .brand-name {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #e1efde
+        }
+
+        .brand-name strong {
+            font-size: 17px;
+            color: white
+        }
+
+        .hero p {
+            color: #d9e8d8;
+            max-width: 800px;
+            margin-top: 12px
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 26px;
+            font-size: 14px;
+            color: #ebf5e7
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            background: var(--yellow);
+            color: var(--deep);
+            border-radius: 30px;
+            padding: 4px 15px;
+            font-weight: 700
+        }
+
+        .section {
+            margin-top: 38px
+        }
+
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px
+        }
+
+        .section-no {
+            height: 40px;
+            width: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #bed2b9;
+            border-radius: 50%;
+            color: var(--green);
+            font: 600 13px system-ui;
+            flex-shrink: 0
+        }
+
+        .section-head p {
+            font-size: 13px
+        }
+
+        .setup {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 14px
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 19px;
+            padding: 20px;
+            position: relative
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px
+        }
+
+        .number {
+            font: 700 13px system-ui;
+            color: var(--green);
+            background: var(--lime);
+            padding: 5px 9px;
+            border-radius: 7px
+        }
+
+        .icon {
+            color: var(--green)
+        }
+
+        .card h3 {
+            margin-bottom: 8px
+        }
+
+        .card p {
+            font-size: 14px;
+            line-height: 1.95
+        }
+
+        .next {
+            position: absolute;
+            right: -13px;
+            top: 48%;
+            width: 24px;
+            height: 24px;
+            display: grid;
+            place-items: center;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            z-index: 1;
+            color: var(--green);
+            font: 16px system-ui
+        }
+
+        .decision {
+            border: 1px solid #e5d58e;
+            background: #fffdf3;
+            border-radius: 24px;
+            padding: 28px
+        }
+
+        .decision-heading {
+            text-align: center;
+            margin-bottom: 24px
+        }
+
+        .decision-heading .pill {
+            font-size: 13px;
+            margin-bottom: 10px
+        }
+
+        .decision-heading h3 {
+            font-size: 23px
+        }
+
+        .branches {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+
+        .branch {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden
+        }
+
+        .branch-header {
+            padding: 17px 21px;
+            background: #edf6ee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .branch.no .branch-header {
+            background: #fbf5e4
+        }
+
+        .answer {
+            font: 700 12px system-ui;
+            border-radius: 6px;
+            background: var(--green);
+            color: white;
+            padding: 7px 10px
+        }
+
+        .no .answer {
+            background: var(--yellow);
+            color: var(--deep)
+        }
+
+        .branch-header h3 {
+            font-size: 17px
+        }
+
+        .branch ol {
+            list-style: none;
+            padding: 6px 21px;
+            margin: 0
+        }
+
+        .branch li {
+            display: flex;
+            gap: 13px;
+            padding: 17px 0
+        }
+
+        .branch li+li {
+            border-top: 1px solid #edf0ea
+        }
+
+        .substep {
+            font: 600 12px/28px system-ui;
+            width: 30px;
+            height: 28px;
+            flex-shrink: 0;
+            background: var(--lime);
+            color: var(--green);
+            border-radius: 50%;
+            text-align: center;
+            margin-top: 4px
+        }
+
+        .no .substep {
+            background: #fcf5d8
+        }
+
+        .branch li p {
+            font-size: 15px;
+            color: var(--ink)
+        }
+
+        .finish {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 20px
+        }
+
+        .finish .card {
+            padding: 27px;
+            display: flex;
+            gap: 20px
+        }
+
+        .finish .card-top {
+            display: block;
+            margin: 0
+        }
+
+        .finish .number {
+            display: grid;
+            place-items: center;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            background: var(--yellow)
+        }
+
+        .finish p {
+            font-size: 15px
+        }
+
+        .finish h3 {
+            margin-bottom: 9px
+        }
+
+        .success {
+            background: #eaf4e4;
+            border-color: #a8c79d
+        }
+
+        .success .number {
+            background: var(--green);
+            color: white
+        }
+
+        .success-icon {
+            display: flex;
+            gap: 9px;
+            align-items: center;
+            color: var(--green);
+            font: 600 12px system-ui;
+            letter-spacing: 1px;
+            margin-bottom: 10px
+        }
+
+        .discount {
+            font-weight: 700;
+            color: var(--deep)
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            margin-top: 35px;
+            padding: 23px 0 5px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: center
+        }
+
+        footer strong {
+            color: var(--green);
+            font-size: 16px
+        }
+
+        footer p {
+            font-size: 13px
+        }
+
+        .foot-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .foot-meta svg {
+            width: 20px;
+            height: 20px
+        }
+
+        .en {
+            font-family: inherit
+        }
+
+        a {
+            color: inherit
+        }
+
+        ::selection {
+            background: #ffe66b;
+            color: #173c23
+        }
+
+        @media(min-width:1000px) {
+            .card h3 {
+                font-size: 17px
+            }
+        }
+
+        @media(max-width:1000px) {
+            .setup {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+            }
+
+            .next {
+                display: none
+            }
+
+            .branches {
+                gap: 14px
+            }
+
+            .card-top {
+                margin-bottom: 15px
+            }
+        }
+
+        @media(max-width:700px) {
+            main {
+                padding: 18px 16px
+            }
+
+            .hero {
+                padding: 27px 24px;
+                border-radius: 22px
+            }
+
+            .brand {
+                margin-bottom: 20px
+            }
+
+            .hero-meta {
+                flex-wrap: wrap;
+                font-size: 12px
+            }
+
+            h1 {
+                font-size: 28px
+            }
+
+            h2 {
+                font-size: 20px
+            }
+
+            .section {
+                margin-top: 28px
+            }
+
+            .section-head {
+                gap: 10px
+            }
+
+            .section-head p {
+                font-size: 12px
+            }
+
+            .setup {
+                grid-template-columns: 1fr;
+                gap: 12px
+            }
+
+            .setup .card {
+                padding: 20px 20px 20px 73px;
+                min-height: 120px
+            }
+
+            .setup .card-top {
+                position: absolute;
+                left: 18px;
+                top: 22px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                margin: 0
+            }
+
+            .setup .card h3 {
+                font-size: 18px
+            }
+
+            .setup .card p {
+                font-size: 15px
+            }
+
+            .branches,
+            .finish {
+                grid-template-columns: 1fr
+            }
+
+            .decision {
+                padding: 20px 14px;
+                border-radius: 20px
+            }
+
+            .decision-heading h3 {
+                font-size: 20px
+            }
+
+            .branch-header {
+                padding: 16px
+            }
+
+            .branch ol {
+                padding: 4px 16px
+            }
+
+            .finish .card {
+                padding: 22px;
+                gap: 15px
+            }
+
+            footer {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .foot-meta {
+                align-items: flex-start
+            }
+        }
+
+        @media print {
+            body {
+                background: white
+            }
+
+            main {
+                padding: 10px;
+                max-width: none
+            }
+
+            .hero {
+                print-color-adjust: exact
+            }
+
+            .section {
+                margin-top: 20px
+            }
+
+            .card,
+            .branch,
+            .decision {
+                break-inside: avoid
+            }
+
+            footer {
+                margin-top: 20px
+            }
+
+            .setup {
+                grid-template-columns: repeat(5, 1fr)
+            }
+
+            .card {
+                padding: 12px
+            }
+
+            .card p {
+                font-size: 12px
+            }
+        }
+
+        /* Replaceable illustrations: all interface text remains real HTML. */
+        .hero {
+            padding-right: 340px;
+            min-height: 320px;
+            background: radial-gradient(ellipse at 85% 15%, #5f8641 0, transparent 42%), linear-gradient(115deg, #102f20, #285e32)
+        }
+
+        .hero-visual {
+            position: absolute;
+            right: 48px;
+            bottom: -60px;
+            width: 220px;
+            transform: rotate(12deg)
+        }
+
+        .visual-slot {
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            margin: 20px -5px -20px;
+            overflow: hidden;
+            border-radius: 14px 14px 0 0;
+            background: linear-gradient(145deg, #f9fbf5, #edf5e8)
+        }
+
+        .visual-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            inset: 0;
+            background: #f3f7ef
+        }
+
+        .visual-slot.has-image .mockup {
+            visibility: hidden
+        }
+
+        .replace {
+            position: absolute;
+            right: 7px;
+            bottom: 7px;
+            border: 1px solid #d3dfcf;
+            background: #fffffff0;
+            color: #245a30;
+            font: 11px/1.4 system-ui;
+            border-radius: 20px;
+            padding: 7px 10px;
+            cursor: pointer;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity .15s
+        }
+
+        .visual-slot:hover .replace,
+        .replace:focus-visible,
+        .visual-slot:focus-within .replace {
+            opacity: 1
+        }
+
+        .phone {
+            width: 112px;
+            height: 168px;
+            border: 5px solid #202620;
+            border-bottom: 0;
+            border-radius: 22px 22px 0 0;
+            background: #fffdf8;
+            box-shadow: 4px 4px 0 #a9aea1;
+            padding: 23px 9px 10px;
+            position: relative;
+            text-align: center
+        }
+
+        .phone:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 30%;
+            width: 40%;
+            height: 9px;
+            background: #202620;
+            border-radius: 0 0 8px 8px
+        }
+
+        .phone .app-logo {
+            display: grid;
+            place-items: center;
+            background: var(--green);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            margin: 10px auto;
+            font: 800 14px system-ui
+        }
+
+        .phone small {
+            font-size: 9px;
+            color: #566759
+        }
+
+        .phone .field {
+            height: 12px;
+            border-radius: 4px;
+            background: #edf0e9;
+            margin: 9px 0
+        }
+
+        .phone .btn {
+            background: var(--green);
+            border-radius: 6px;
+            color: white;
+            font-size: 10px;
+            padding: 4px;
+            margin-top: 12px
+        }
+
+        .phone .otp {
+            display: flex;
+            gap: 3px;
+            margin: 18px 0
+        }
+
+        .otp i {
+            border: 1px solid #dce3d8;
+            border-radius: 4px;
+            width: 14px;
+            height: 24px
+        }
+
+        .phone svg {
+            color: var(--green);
+            width: 38px;
+            height: 38px;
+            margin-top: 12px
+        }
+
+        .toggle {
+            background: #edf6e8;
+            border-radius: 9px;
+            padding: 8px 4px;
+            font: 10px system-ui;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px
+        }
+
+        .toggle:after {
+            content: '●';
+            color: white;
+            text-align: right;
+            background: #00a56c;
+            border-radius: 10px;
+            width: 25px;
+            padding-right: 2px
+        }
+
+        .qr-placeholder {
+            width: 88px;
+            height: 88px;
+            border: 2px dashed #9ab293;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: white;
+            color: var(--green)
+        }
+
+        .qr-placeholder svg {
+            width: 57px;
+            height: 57px
+        }
+
+        .qr-wrap {
+            padding: 20px 0 35px;
+            display: flex;
+            align-items: center;
+            gap: 9px
+        }
+
+        .store-list {
+            display: grid;
+            gap: 8px
+        }
+
+        .store-list span {
+            background: #20392d;
+            color: white;
+            font: 9px system-ui;
+            border-radius: 5px;
+            padding: 8px
+        }
+
+        .placeholder-caption {
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            font: 10px system-ui;
+            text-align: center;
+            color: #71816c
+        }
+
+        .branch {
+            position: relative
+        }
+
+        .branch ol {
+            padding-right: 155px
+        }
+
+        .branch .visual-slot {
+            position: absolute;
+            right: 12px;
+            bottom: 18px;
+            width: 130px;
+            height: 205px;
+            margin: 0;
+            border-radius: 15px;
+            background: transparent
+        }
+
+        .branch .phone {
+            width: 98px;
+            height: 175px;
+            transform: rotate(10deg);
+            border-bottom: 5px solid #202620;
+            border-radius: 20px
+        }
+
+        .account-art {
+            width: 95px;
+            height: 125px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 5px 10px 20px #d4c7bb;
+            transform: rotate(10deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative
+        }
+
+        .account-art svg {
+            width: 60px;
+            height: 60px;
+            color: #db4261
+        }
+
+        .account-art:after {
+            content: '+';
+            position: absolute;
+            bottom: 5px;
+            right: -12px;
+            background: var(--yellow);
+            border: 4px solid #fff4d5;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font: 30px/40px system-ui;
+            text-align: center;
+            color: #8c650d
+        }
+
+        .no .visual-slot {
+            background: #fff2f4
+        }
+
+        .no {
+            border-color: #efb8c6
+        }
+
+        .no .branch-header {
+            background: #fff0f3
+        }
+
+        .no .answer {
+            background: #e93968;
+            color: white
+        }
+
+        .no .substep {
+            background: #ffe7ee;
+            color: #c02750
+        }
+
+        .section-head {
+            background: #e8f3e4;
+            border-radius: 15px;
+            padding: 12px 17px
+        }
+
+        .section-no {
+            background: var(--green);
+            color: white;
+            border: 0
+        }
+
+        .finish .card:after {
+            content: '→';
+            color: var(--green);
+            font-size: 24px;
+            align-self: center
+        }
+
+        .hero-visual .visual-slot {
+            height: 270px;
+            background: transparent;
+            margin: 0;
+            align-items: center
+        }
+
+        .hero-visual .phone {
+            height: 240px;
+            width: 145px;
+            border-bottom: 5px solid #202620;
+            border-radius: 25px;
+            background: #f6f7ee
+        }
+
+        .hero-visual .app-logo {
+            width: 85px;
+            height: 85px;
+            font-size: 24px;
+            margin-top: 25px
+        }
+
+        .hero-visual .replace {
+            transform: rotate(-12deg)
+        }
+
+        .setup .card {
+            box-shadow: 0 6px 18px #214c2606
+        }
+
+        .visual-note {
+            font: 12px/1.6 system-ui;
+            color: #71816c;
+            margin-top: 12px;
+            text-align: right
+        }
+
+        .save-preview {
+            font: 12px system-ui;
+            color: var(--green);
+            background: white;
+            border: 1px solid #c6d9bf;
+            border-radius: 20px;
+            padding: 9px 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .save-preview:hover {
+            border-color: var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .save-preview.btn-pdf {
+            background: #1a5632;
+            color: white;
+            border-color: #1a5632;
+            font-weight: 600;
+        }
+
+        .save-preview.btn-pdf:hover {
+            background: #256f42;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+        .toolbar span {
+            font: 12px system-ui;
+            color: #63715e
+        }
+
+        @media(hover:none) {
+            .replace {
+                opacity: 1
+            }
+        }
+
+        @media(max-width:1000px) {
+            .hero {
+                padding-right: 240px
+            }
+
+            .hero-visual {
+                right: 20px;
+                width: 190px
+            }
+
+            .branch ol {
+                padding-right: 21px
+            }
+
+            .branch .visual-slot {
+                position: relative;
+                right: auto;
+                bottom: auto;
+                width: 100%;
+                height: 180px
+            }
+
+            .branch .phone {
+                height: 160px
+            }
+
+            .setup .visual-slot {
+                height: 180px
+            }
+        }
+
+        @media(max-width:700px) {
+            .hero {
+                padding: 26px 24px 0
+            }
+
+            .hero-visual {
+                position: relative;
+                right: auto;
+                bottom: -25px;
+                width: 100%;
+                transform: rotate(8deg);
+                height: 195px
+            }
+
+            .hero-visual .visual-slot {
+                height: 220px
+            }
+
+            .hero-visual .phone {
+                height: 220px
+            }
+
+            .setup .card {
+                padding-bottom: 20px
+            }
+
+            .setup .visual-slot {
+                margin: 15px 0 -20px;
+                min-height: 175px
+            }
+
+            .section-head {
+                padding: 12px
+            }
+
+            .branch .visual-slot {
+                height: 175px
+            }
+
+            .toolbar {
+                align-items: flex-end
+            }
+
+            .toolbar span {
+                max-width: 170px
+            }
+
+            .visual-note {
+                text-align: left
+            }
+
+            .finish .card:after {
+                display: none
+            }
+        }
+
+        @media print {
+
+            .toolbar,
+            .replace,
+            .visual-note,
+            .placeholder-caption {
+                display: none
+            }
+
+            .hero {
+                padding-right: 240px
+            }
+
+            .hero-visual {
+                width: 190px
+            }
+
+            .visual-slot {
+                min-height: 150px
+            }
+
+            .branch ol {
+                padding-right: 21px
+            }
+
+            .branch .visual-slot {
+                display: none
+            }
+        }
+
+
+        @page {
+            size: A3 portrait;
+            margin: 10mm
+        }
+
+        @media print {
+
+            html,
+            body {
+                width: auto !important;
+                background: white !important;
+                font-size: 14px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact
+            }
+
+            main {
+                width: 1100px !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 auto !important
+            }
+
+            .hero {
+                min-height: 250px;
+                padding: 24px 250px 24px 30px !important;
+                break-inside: avoid
+            }
+
+            h1 {
+                font-size: 32px
+            }
+
+            .hero .brand {
+                margin-bottom: 15px
+            }
+
+            .hero-meta {
+                margin-top: 16px
+            }
+
+            .hero-visual {
+                position: absolute !important;
+                right: 30px !important;
+                bottom: -45px !important;
+                width: 190px !important;
+                height: auto !important;
+                transform: rotate(12deg) !important
+            }
+
+            .hero-visual .visual-slot {
+                height: 270px !important
+            }
+
+            .hero-visual .phone {
+                height: 240px !important
+            }
+
+            .section {
+                margin-top: 20px !important;
+                break-inside: avoid
+            }
+
+            .section-head {
+                padding: 8px 14px;
+                margin-bottom: 12px
+            }
+
+            h2 {
+                font-size: 20px
+            }
+
+            .section-head p {
+                font-size: 12px
+            }
+
+            .setup {
+                grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+                gap: 10px
+            }
+
+            .setup .card {
+                padding: 15px !important;
+                min-height: 0 !important
+            }
+
+            .setup .card-top {
+                position: static !important;
+                display: flex !important;
+                flex-direction: row !important;
+                margin-bottom: 14px !important
+            }
+
+            .setup .card h3 {
+                font-size: 16px
+            }
+
+            .setup .card p {
+                font-size: 13px
+            }
+
+            .setup .visual-slot {
+                height: 165px !important;
+                min-height: 165px !important;
+                margin: 14px -3px -15px !important
+            }
+
+            .branches {
+                grid-template-columns: 1fr 1fr !important
+            }
+
+            .decision {
+                padding: 18px
+            }
+
+            .decision-heading {
+                margin-bottom: 15px
+            }
+
+            .decision-heading h3 {
+                font-size: 20px
+            }
+
+            .branch ol {
+                padding: 4px 16px !important
+            }
+
+            .branch li {
+                padding: 12px 0
+            }
+
+            .branch li p {
+                font-size: 13px
+            }
+
+            .branch-header {
+                padding: 13px 16px
+            }
+
+            .branch-header h3 {
+                font-size: 16px
+            }
+
+            .finish {
+                grid-template-columns: 1.15fr 1fr !important;
+                gap: 14px
+            }
+
+            .finish .card {
+                padding: 20px !important
+            }
+
+            .finish h3 {
+                font-size: 17px
+            }
+
+            .finish p {
+                font-size: 13px
+            }
+
+            footer {
+                flex-direction: row !important;
+                margin-top: 20px;
+                padding-top: 14px
+            }
+
+            .toolbar,
+            .replace,
+            .visual-note,
+            .placeholder-caption {
+                display: none !important
+            }
+        }
+
+        @media(max-width:700px) {
+            .toolbar {
+                flex-wrap: wrap
+            }
+
+            .toolbar span {
+                max-width: none;
+                flex-basis: 100%
+            }
+
+            .save-preview {
+                min-height: 40px
+            }
+        }
+
+        /* Header illustration upload stays visible and separate from the background. */
+        .hero-visual .replace {
+            opacity: 1;
+            transform: none;
+            right: 50%;
+            bottom: 12px;
+            translate: 50% 0;
+            white-space: nowrap;
+            padding: 10px 15px;
+            font-size: 12px;
+            box-shadow: 0 2px 12px #0002
+        }
+
+        .hero-visual {
+            transform: none;
+            bottom: 0;
+            right: 35px;
+            width: 240px
+        }
+
+        .hero-visual .visual-slot {
+            height: 290px;
+            overflow: visible
+        }
+
+        .hero-visual .mockup {
+            transform: rotate(12deg);
+            margin-bottom: -55px
+        }
+
+        .hero-visual .visual-slot img {
+            object-fit: contain;
+            background: transparent;
+            border-radius: 0;
+            inset: 0 0 40px;
+            height: calc(100% - 40px)
+        }
+
+        .hero-visual .placeholder-caption {
+            display: none
+        }
+
+        @media(max-width:700px) {
+            .hero-visual {
+                right: auto;
+                bottom: 0;
+                width: 100%;
+                height: 235px;
+                transform: none
+            }
+
+            .hero-visual .visual-slot {
+                height: 235px;
+                overflow: hidden
+            }
+
+            .hero-visual .mockup {
+                margin-bottom: -50px
+            }
+
+            .hero-visual .replace {
+                bottom: 12px
+            }
+        }
+
+        @media print {
+            .hero-visual .replace {
+                display: none !important
+            }
+
+            .hero-visual .visual-slot img {
+                inset: 0;
+                height: 100%
+            }
+        }
+
+        .editing .editable-field {
+            outline: 1px dashed #7baa68;
+            outline-offset: 4px;
+            border-radius: 3px;
+            cursor: text;
+            min-width: 1ch;
+            min-height: 1em
+        }
+
+        .editing .editable-field:focus {
+            outline: 2px solid #d5ad05;
+            background: #ffdf2420
+        }
+
+        #edit[aria-pressed="true"] {
+            background: var(--yellow);
+            border-color: #d0ac1b
+        }
+
+        @media print {
+            [contenteditable] {
+                outline: none !important;
+                background: transparent !important
+            }
+        }
+
+        /* Account paths use the same card treatment as the setup steps. */
+        .decision {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            border-radius: 0
+        }
+
+        .branches {
+            gap: 14px;
+            align-items: stretch
+        }
+
+        .branch,
+        .branch.no {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 19px;
+            background: white;
+            box-shadow: 0 6px 18px #214c2606;
+            overflow: hidden
+        }
+
+        .branch>.card-top {
+            margin-bottom: 22px
+        }
+
+        .branch .branch-header,
+        .branch.no .branch-header {
+            padding: 0 0 16px;
+            background: transparent;
+            border: 0;
+            align-items: flex-start
+        }
+
+        .branch .branch-header h3 {
+            font-size: 19px
+        }
+
+        .branch ol {
+            padding: 0 !important;
+            flex: 1
+        }
+
+        .branch li {
+            padding: 14px 0;
+            gap: 13px
+        }
+
+        .branch li p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.95
+        }
+
+        .branch .substep,
+        .branch.no .substep {
+            background: var(--lime);
+            color: var(--green);
+            border-radius: 7px;
+            font-weight: 700
+        }
+
+        .branch>.visual-slot,
+        .branch.no>.visual-slot {
+            position: relative;
+            right: auto;
+            bottom: auto;
+            width: auto;
+            height: 190px;
+            min-height: 190px;
+            margin: 20px -5px -20px;
+            border-radius: 14px 14px 0 0;
+            background: linear-gradient(145deg, #f9fbf5, #edf5e8)
+        }
+
+        .branch .phone {
+            width: 112px;
+            height: 168px;
+            transform: none;
+            border-bottom: 0;
+            border-radius: 22px 22px 0 0
+        }
+
+        .branch .account-art svg {
+            color: var(--green)
+        }
+
+        @media(max-width:700px) {
+
+            .branch,
+            .branch.no {
+                padding: 20px
+            }
+
+            .branch>.card-top {
+                margin-bottom: 15px
+            }
+
+            .branch .branch-header h3 {
+                font-size: 18px
+            }
+
+            .branch li p {
+                font-size: 15px
+            }
+        }
+
+        @media print {
+            .decision {
+                padding: 0 !important;
+                border: 0
+            }
+
+            .branches {
+                gap: 10px
+            }
+
+            .branch,
+            .branch.no {
+                padding: 15px
+            }
+
+            .branch .branch-header {
+                padding: 0 0 12px
+            }
+
+            .branch .branch-header h3 {
+                font-size: 16px
+            }
+
+            .branch li p {
+                font-size: 13px
+            }
+
+            .branch>.visual-slot,
+            .branch.no>.visual-slot {
+                display: flex !important;
+                position: relative !important;
+                height: 145px !important;
+                min-height: 145px !important;
+                width: auto !important;
+                margin: 12px -3px -15px
+            }
+
+            .branch>.card-top {
+                margin-bottom: 14px
+            }
+
+            .branch .phone {
+                height: 140px
+            }
+        }
+
+        #edit,
+        #edit[aria-pressed="true"] {
+            background: linear-gradient(110deg, #174b29 0%, #287739 30%, #e7ca36 65%, #174b29 100%);
+            background-size: 300% 100%;
+            color: white;
+            border: 1px solid #397739;
+            font-weight: 600;
+            box-shadow: 0 3px 10px #174b2920;
+            animation: edit-gradient 14s ease-in-out infinite;
+            text-shadow: 0 1px 3px #173c29;
+            transition: box-shadow .25s ease
+        }
+
+        #edit:hover {
+            box-shadow: 0 4px 14px #174b2938
+        }
+
+        #edit:focus-visible {
+            outline: 3px solid #d1a916;
+            outline-offset: 3px
+        }
+
+        #edit[aria-pressed="true"] {
+            border-color: #b9930c;
+            box-shadow: 0 0 0 2px #ffda264d
+        }
+
+        @keyframes edit-gradient {
+
+            0%,
+            100% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            #edit {
+                animation: none;
+                background-position: 0% 50%
+            }
+        }
+
+        /* Beta Announcement Notice */
+        .beta-notice {
+            background: linear-gradient(135deg, #fffcf0 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            border-left: 5px solid #d97706;
+            border-radius: 14px;
+            padding: 13px 20px;
+            margin: 16px 0 20px;
+            box-shadow: 0 4px 14px #b453090f;
+        }
+
+        .beta-notice-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .beta-badge {
+            background: #d97706;
+            color: white;
+            font: 700 11px system-ui, sans-serif;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .beta-notice-title strong {
+            color: #92400e;
+            font-size: 15px;
+        }
+
+        .beta-notice p {
+            color: #78350f;
+            font-size: 13.5px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* Platform Row Headers for Section 1 */
+        .platform-row-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 11px 18px;
+            margin: 22px 0 14px;
+            box-shadow: 0 2px 8px #0000000a;
+        }
+
+        .platform-row-header.ios-row-header {
+            border-left: 5px solid #0071e3;
+            background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%);
+        }
+
+        .platform-row-header.android-row-header {
+            border-left: 5px solid #1b873f;
+            background: linear-gradient(90deg, #f0fbf3 0%, #ffffff 100%);
+            margin-top: 32px;
+        }
+
+        .platform-row-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .platform-pill {
+            font: 700 12px system-ui, sans-serif;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .ios-pill {
+            background: #0071e3;
+            color: white;
+        }
+
+        .android-pill {
+            background: #1b873f;
+            color: white;
+        }
+
+        .platform-row-title strong {
+            font-size: 15.5px;
+            color: var(--ink);
+        }
+
+        .platform-track-meta {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* Single QR Slot */
+        .single-qr-slot {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 8px 16px;
+            box-sizing: border-box;
+        }
+
+        .single-qr-card {
+            background: white;
+            border: 1px solid #d8e2d4;
+            border-radius: 12px;
+            padding: 8px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .single-qr-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .single-qr-card .qr-img-box {
+            width: 95px;
+            height: 95px;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #edf0ea;
+        }
+
+        .single-qr-card .qr-img-box img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            position: static !important;
+            display: block;
+        }
+
+        .platform-badge {
+            font: 700 10.5px system-ui, sans-serif;
+            padding: 2.5px 9px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ios-badge {
+            background: #0071e3;
+            color: white;
+        }
+
+        .android-badge {
+            background: #1b873f;
+            color: white;
+        }
+
+        .qr-card-sub {
+            font: 600 10px system-ui, sans-serif;
+            color: var(--muted);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        /* Phone Preview Slot */
+        .phone-preview-slot {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .phone-preview-slot img {
+            max-height: 172px;
+            width: auto !important;
+            max-width: 92%;
+            border-radius: 14px 14px 0 0;
+            border: 3.5px solid #202620;
+            border-bottom: 0;
+            position: static !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+            display: block;
+            background: white;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .phone-badge-tag {
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            background: var(--green);
+            color: white;
+            font: 700 9px system-ui;
+            padding: 2.5px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            z-index: 2;
+            letter-spacing: 0.3px;
+        }
+
+        .phone-badge-tag.ios-tag {
+            background: #0071e3;
+        }
+
+        .phone-badge-tag.android-tag {
+            background: #1b873f;
+        }
+
+        /* Firebase APK Mockup */
+        .apk-download-box {
+            background: #ffffff;
+            border: 3.5px solid #202620;
+            border-bottom: 0;
+            border-radius: 14px 14px 0 0;
+            width: 86%;
+            max-width: 135px;
+            height: 172px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 8px 10px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        .apk-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #fff8e1;
+            border: 1.5px solid #ffcc00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            color: #d97706;
+            font: 800 20px system-ui;
+        }
+
+        .apk-app-title {
+            font: 700 12px system-ui, sans-serif;
+            color: var(--ink);
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .apk-app-sub {
+            font: 500 9px system-ui, sans-serif;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .apk-download-btn {
+            background: #1b873f;
+            color: white;
+            font: 700 10px system-ui, sans-serif;
+            padding: 6px 10px;
+            border-radius: 6px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(27,135,63,0.3);
+        }
+
+        .platform-row-header.staff-row-header {
+            border-left: 5px solid #1a5632;
+            background: linear-gradient(90deg, #f0f8f2 0%, #ffffff 100%);
+            margin: 18px 0 14px;
+        }
+
+        .staff-pill {
+            background: #1a5632;
+            color: white;
+        }
+
+        .staff-tag {
+            background: #1a5632;
+            color: white;
+        }
+
+        .staff-tag-success {
+            background: #059669;
+            color: white;
+        }
+
+        /* AD Account Notice */
+        .ad-notice {
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid #0284c7;
+            border-radius: 14px;
+            padding: 13px 20px;
+            margin: 16px 0 20px;
+            box-shadow: 0 4px 14px #0f172a0a;
+        }
+
+        .ad-notice-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .ad-badge {
+            background: #0284c7;
+            color: white;
+            font: 700 11px system-ui, sans-serif;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .ad-notice-title strong {
+            color: #0369a1;
+            font-size: 15px;
+        }
+
+        .ad-notice p {
+            color: #334155;
+            font-size: 13.5px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        @media print {
+            .beta-notice {
+                border-left-color: #d97706 !important;
+                background: #fefce8 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .ad-notice {
+                border-left-color: #0284c7 !important;
+                background: #f0f9ff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .platform-row-header {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                break-inside: avoid;
+            }
+            .ios-row-header {
+                border-left-color: #0071e3 !important;
+            }
+            .android-row-header {
+                border-left-color: #1b873f !important;
+            }
+            .staff-row-header {
+                border-left-color: #1a5632 !important;
+            }
+            .platform-pill,
+            .platform-badge,
+            .phone-badge-tag {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .single-qr-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+            .phone-preview-slot img {
+                max-height: 140px !important;
+            }
+            .apk-download-box {
+                height: 140px !important;
+            }
+        }
+    </style>
+    <script bis_use="true" type="text/javascript" charset="utf-8" nonce=""
+        data-dynamic-id="db349eb4-9700-4747-8d98-a5f1a06be63a"
+        src="chrome-extension://pphgdbgldlmicfdkhondlafkiomnelnk/executors/200.js"></script>
+</head>
+
+<body __processed_805c8ca6-d330-4b89-9b2a-7b59de1df1e1__="true"
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6InBwaGdkYmdsZGxtaWNmZGtob25kbGFma2lvbW5lbG5rIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi40LjAiLCJzY29yZSI6MjA0MDB9XQ=="
+    class="">
+    <svg class="sprites" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <symbol id="qr" viewBox="0 0 24 24">
+                <path
+                    d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM21 14v7h-6M12 3v3M12 11v3M3 12h5M17 12h4M12 18v3">
+                </path>
+            </symbol>
+            <symbol id="download" viewBox="0 0 24 24">
+                <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"></path>
+            </symbol>
+            <symbol id="user" viewBox="0 0 24 24">
+                <circle cx="10" cy="7" r="4"></circle>
+                <path d="M3 21v-3a7 7 0 0 1 14 0v3M20 8v6m-3-3h6"></path>
+            </symbol>
+            <symbol id="shield" viewBox="0 0 24 24">
+                <path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6"></path>
+            </symbol>
+            <symbol id="settings" viewBox="0 0 24 24">
+                <path d="M4 7h16M4 17h16"></path>
+                <circle cx="9" cy="7" r="3" fill="white"></circle>
+                <circle cx="16" cy="17" r="3" fill="white"></circle>
+            </symbol>
+            <symbol id="check" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="m8 12 3 3 5-6"></path>
+            </symbol>
+            <symbol id="pin" viewBox="0 0 24 24">
+                <path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"></path>
+                <circle cx="12" cy="10" r="2"></circle>
+            </symbol>
+        </defs>
+    </svg>
+    <main>
+        <div class="toolbar" lang="en" bis_skin_checked="1">
+            <button type="button" class="save-preview" id="edit" aria-pressed="false">Edit content ✎</button>
+            <a href="omr-ordering-guide.pdf" download="omr-ordering-guide.pdf" class="save-preview btn-pdf" id="pdf-download">Download PDF File ↓</a>
+            <button type="button" class="save-preview" id="pdf-print">Print / Save Dialog 🖨️</button>
+            <button type="button" class="save-preview" id="save">Save HTML copy ↓</button>
+        </div>
+        <header class="hero">
+            <div class="brand" bis_skin_checked="1"><span class="mark">OMR</span>
+                <div class="brand-name" bis_skin_checked="1"><strong>ភោជនីយដ្ឋាន វ័នម៉រ</strong><br>One More Restaurant
+                    · OMR App</div>
+            </div>
+            <h1 class="">របៀបចុះឈ្មោះ និងកម្ម៉ង់អាហារ<br>ក្នុងកម្មវិធី OMR</h1>
+            <p class="">សេចក្តីណែនាំសម្រាប់អតិថិជន និងបុគ្គលិក — អនុវត្តតាមជំហានងាយៗទាំង ៨ ខាងក្រោម</p>
+            <div class="hero-meta" bis_skin_checked="1"><span class="pill">៨ ជំហានងាយៗ</span><span>ស្កេន · ចុះឈ្មោះ · Staff Activation · កម្ម៉ង់</span></div>
+            <div class="hero-visual" bis_skin_checked="1">
+                <div class="visual-slot" role="group" aria-label="Hero app visual" bis_skin_checked="1">
+                    <div class="mockup" aria-hidden="true" bis_skin_checked="1">
+                        <div class="phone" bis_skin_checked="1">
+                            <div class="app-logo" bis_skin_checked="1">OMR</div><small class="">ONE MORE
+                                RESTAURANT</small>
+                            <div class="btn" bis_skin_checked="1">Good Food · Good Moment</div>
+                        </div>
+                    </div><button class="replace" type="button" aria-label="Upload header phone illustration">＋ Upload
+                        header image</button><input type="file" accept="image/*" hidden=""><span
+                        class="placeholder-caption" lang="en">Image placeholder</span>
+                </div>
+            </div>
+        </header>
+        <section class="section" aria-labelledby="setup-title">
+            <div class="section-head" bis_skin_checked="1"><span class="section-no">01</span>
+                <div bis_skin_checked="1">
+                    <h2 id="setup-title" class="">ការទាញយកកម្មវិធី និងចុះឈ្មោះគណនី (Download & Register)</h2>
+                    <p class="">ផ្នែកទី ១ · ៥ ជំហានងាយៗតាមប្រព័ន្ធ iOS និង Android (បច្ចុប្បន្នមិនទាន់មានលើ App Store/Play Store)</p>
+                </div>
+            </div>
+            <div class="beta-notice" bis_skin_checked="1">
+                <div class="beta-notice-title" bis_skin_checked="1">
+                    <span class="beta-badge">Beta Notice</span>
+                    <strong>កម្មវិធីស្ថិតក្នុងដំណាក់កាលសាកល្បងផ្ទៃក្នុង (Beta Testing)</strong>
+                </div>
+                <p>បច្ចុប្បន្នកម្មវិធី OMR App មិនទាន់មាននៅលើ App Store ឬ Google Play Store ផ្លូវការនៅឡើយទេ។ សូមជ្រើសរើសការណែនាំតាមប្រភេទប្រព័ន្ធទូរស័ព្ទរបស់អ្នកខាងក្រោម៖<br>
+                • <b>Apple iPhone (iOS)៖</b> ស្កេន QR ដំឡើងកម្មវិធី <b>TestFlight</b> ជាមុនសិន រួចដំឡើង OMR App។<br>
+                • <b>Android (Samsung, Xiaomi, etc.)៖</b> ស្កេន QR ទាញយកឯកសារ <b>APK ពី Firebase</b> រួចចុចដំឡើង។</p>
+            </div>
+
+            <!-- TRACK 1: APPLE iOS -->
+            <div class="platform-row-header ios-row-header" bis_skin_checked="1">
+                <div class="platform-row-title" bis_skin_checked="1">
+                    <span class="platform-pill ios-pill">🍏 Apple iOS</span>
+                    <strong>សម្រាប់ទូរស័ព្ទ iPhone & iPad (តាមរយៈ TestFlight)</strong>
+                </div>
+                <span class="platform-track-meta">៥ ជំហានងាយៗ · iOS Track</span>
+            </div>
+            <ol class="setup">
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">01</span><svg class="icon" aria-hidden="true"><use href="#qr"></use></svg></div>
+                    <h3 class="">ស្កេន QR កូដ iOS</h3>
+                    <p class="">ប្រើកាមេរ៉ា iPhone ស្កេន QR កូដ ដើម្បីចូលទៅកាន់ TestFlight</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="iOS QR Code" bis_skin_checked="1">
+                        <div class="single-qr-slot" bis_skin_checked="1">
+                            <div class="single-qr-card" bis_skin_checked="1">
+                                <span class="platform-badge ios-badge">Apple iOS</span>
+                                <div class="qr-img-box" bis_skin_checked="1">
+                                    <img src="image/IOS.jpg" alt="iOS QR Code">
+                                </div>
+                                <span class="qr-card-sub">TestFlight Link</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">02</span><svg class="icon" aria-hidden="true"><use href="#download"></use></svg></div>
+                    <h3 class="">ដំឡើង TestFlight</h3>
+                    <p class="">ចុច <b>"View in App Store"</b> រួចទាញយកកម្មវិធី TestFlight មកទុកក្នុងម៉ាស៊ីន</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Step 1 Get TestFlight screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag ios-tag">Step 1 · TestFlight</span>
+                            <img src="image/photo_1_2026-10-14_12-23-04.jpg" alt="Get TestFlight Screen">
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">03</span><svg class="icon" aria-hidden="true"><use href="#download"></use></svg></div>
+                    <h3 class="">ដំឡើង OMR Mobile</h3>
+                    <p class="">បើកក្នុង TestFlight រួចចុច <b>"Install"</b> កម្មវិធី OMR MOBILE</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Step 2 Install OMR Mobile screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag ios-tag">Step 2 · Install App</span>
+                            <img src="image/photo_2_2026-10-14_12-23-04.jpg" alt="Install OMR Mobile in TestFlight">
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">04</span><svg class="icon" aria-hidden="true"><use href="#user"></use></svg></div>
+                    <h3 class="">ចុះឈ្មោះគណនី (Register)</h3>
+                    <p class="">បើកកម្មវិធី រួចបំពេញព័ត៌មាន (ឈ្មោះ, លេខទូរស័ព្ទ, ថ្ងៃខែ, Password)</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Registration screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag ios-tag">Register</span>
+                            <img src="image/photo_4_2026-10-14_11-51-52.jpg" alt="Registration Screen">
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">05</span><svg class="icon" aria-hidden="true"><use href="#shield"></use></svg></div>
+                    <h3 class="">ផ្ទៀងផ្ទាត់លេខកូដ OTP</h3>
+                    <p class="">បញ្ចូលលេខកូដសម្ងាត់ <b>OTP</b> ៦ ខ្ទង់ដែលបានផ្ញើមកតាម <b>SMS</b></p>
+                    <div class="visual-slot has-image" role="group" aria-label="OTP verification screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag ios-tag">SMS OTP</span>
+                            <img src="image/photo_2026-10-14_11-44-14.jpg" alt="OTP Verification Screen">
+                        </div>
+                    </div>
+                </li>
+            </ol>
+
+            <!-- TRACK 2: GOOGLE ANDROID -->
+            <div class="platform-row-header android-row-header" bis_skin_checked="1">
+                <div class="platform-row-title" bis_skin_checked="1">
+                    <span class="platform-pill android-pill">🤖 Google Android</span>
+                    <strong>សម្រាប់ទូរស័ព្ទ Android (Samsung, Xiaomi, Oppo, etc.)</strong>
+                </div>
+                <span class="platform-track-meta">៥ ជំហានងាយៗ · Android Track</span>
+            </div>
+            <ol class="setup">
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">01</span><svg class="icon" aria-hidden="true"><use href="#qr"></use></svg></div>
+                    <h3 class="">ស្កេន QR កូដ Android</h3>
+                    <p class="">ស្កេន QR កូដ ដើម្បីចូលទៅកាន់ទំព័រទាញយក APK ពី Firebase</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Android QR Code" bis_skin_checked="1">
+                        <div class="single-qr-slot" bis_skin_checked="1">
+                            <div class="single-qr-card" bis_skin_checked="1">
+                                <span class="platform-badge android-badge">Android</span>
+                                <div class="qr-img-box" bis_skin_checked="1">
+                                    <img src="image/Android.jpg" alt="Android QR Code">
+                                </div>
+                                <span class="qr-card-sub">Firebase Link</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">02</span><svg class="icon" aria-hidden="true"><use href="#download"></use></svg></div>
+                    <h3 class="">ទាញយក Firebase APK</h3>
+                    <p class="">ចុច <b>"Download APK"</b> (ជ្រើសរើស Download anyway ប្រសិនបើសួរ)</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Download Firebase APK" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <div class="apk-download-box" bis_skin_checked="1">
+                                <div class="apk-icon-circle" bis_skin_checked="1">🔥</div>
+                                <div class="apk-app-title" bis_skin_checked="1">OMR Mobile</div>
+                                <div class="apk-app-sub" bis_skin_checked="1">Firebase Distribution</div>
+                                <div class="apk-download-btn" bis_skin_checked="1">
+                                    <svg viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"></path></svg>
+                                    Download APK
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">03</span><svg class="icon" aria-hidden="true"><use href="#check"></use></svg></div>
+                    <h3 class="">ដំឡើង និងបើក OMR</h3>
+                    <p class="">ចុច Install (Allow unknown apps) រួចបើកកម្មវិធី <b>OMR Dev</b></p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Installed OMR App" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag android-tag">OMR Dev App</span>
+                            <img src="image/photo_1_2026-10-14_12-21-58.jpg" alt="Installed OMR App on Android">
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">04</span><svg class="icon" aria-hidden="true"><use href="#user"></use></svg></div>
+                    <h3 class="">ចុះឈ្មោះគណនី (Register)</h3>
+                    <p class="">បំពេញព័ត៌មាន (ឈ្មោះ, លេខទូរស័ព្ទ, ភេទ, ថ្ងៃខែ, Password)</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Android Registration screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag android-tag">Register</span>
+                            <img src="image/photo_3_2026-10-14_12-21-58.jpg" alt="Android Registration Screen">
+                        </div>
+                    </div>
+                </li>
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">05</span><svg class="icon" aria-hidden="true"><use href="#shield"></use></svg></div>
+                    <h3 class="">ផ្ទៀងផ្ទាត់លេខកូដ OTP</h3>
+                    <p class="">បញ្ចូលលេខកូដសម្ងាត់ <b>OTP</b> ៦ ខ្ទង់ដែលបានផ្ញើមកតាម <b>SMS</b></p>
+                    <div class="visual-slot has-image" role="group" aria-label="OTP verification screen" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag android-tag">SMS OTP</span>
+                            <img src="image/photo_2026-10-14_11-44-14.jpg" alt="OTP Verification Screen">
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </section>
+        <section class="section" aria-labelledby="staff-title">
+            <div class="section-head" bis_skin_checked="1"><span class="section-no">02</span>
+                <div bis_skin_checked="1">
+                    <h2 id="staff-title" class="">ការផ្ទៀងផ្ទាត់ និងបើកដំណើរការគណនីបុគ្គលិក (Staff Activation)</h2>
+                    <p class="">ផ្នែកទី ២ · ជំហានទី ៦ · ផ្ទៀងផ្ទាត់គណនី AD របស់ក្រុមហ៊ុន ដើម្បីទទួលបានការបញ្ចុះតម្លៃបុគ្គលិក (Staff Discount 10% - 40%)</p>
+                </div>
+            </div>
+
+            <!-- AD ACCOUNT ADVISORY BANNER -->
+            <div class="ad-notice" bis_skin_checked="1">
+                <div class="ad-notice-title" bis_skin_checked="1">
+                    <span class="ad-badge">Company AD / Outlook</span>
+                    <strong>ការប្រើប្រាស់គណនីក្រុមហ៊ុនដើម្បីផ្ទៀងផ្ទាត់ (AD Credentials)</strong>
+                </div>
+                <p>
+                    • <b>សំរាប់អ្នកមានគណនី Outlook / AD ស្រាប់៖</b> អាចបំពេញ Username AD (ឧ. <code>noch.pry</code> ឬ <code>dara.rith@vital.com.kh</code>) និង Password ក្រុមហ៊ុន ដើម្បីធ្វើការ Activate ភ្លាមៗ។<br>
+                    • <b>សំរាប់អ្នកមិនទាន់មានគណនី Outlook / AD៖</b> សូមទាក់ទងផ្នែក IT ឬក្រុមការងាររដ្ឋបាលសាខា ដើម្បីបង្កើតគណនី AD ជាមុនសិន ទើបអាចចូលធ្វើ Staff Activation បាន។
+                </p>
+            </div>
+
+            <!-- STAFF ACTIVATION TRACK HEADER -->
+            <div class="platform-row-header staff-row-header" bis_skin_checked="1">
+                <div class="platform-row-title" bis_skin_checked="1">
+                    <span class="platform-pill staff-pill">👤 Staff Activation Flow</span>
+                    <strong>ដំណើរការ ៥ ជំហានក្នុងការផ្ទៀងផ្ទាត់ និងបើកដំណើរការអត្តសញ្ញាណបុគ្គលិក</strong>
+                </div>
+                <span class="platform-track-meta">៥ ជំហានងាយៗ · Staff Track</span>
+            </div>
+
+            <ol class="setup">
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">6A</span><svg class="icon" aria-hidden="true"><use href="#settings"></use></svg></div>
+                    <h3 class="">ចូល Staff Activation</h3>
+                    <p class="">ចូលទំព័រ <b>"គណនី" (Account)</b> អូសចុះក្រោម រួចចុចលើ <b>"Staff Activation"</b></p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Staff Activation Menu Item" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag staff-tag">1 · Staff Activation</span>
+                            <img src="image/photo_2_2026-10-14_12-22-35.jpg" alt="Staff Activation Menu Item">
+                        </div>
+                    </div>
+                </li>
+
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">6B</span><svg class="icon" aria-hidden="true"><use href="#user"></use></svg></div>
+                    <h3 class="">ទម្រង់ Verify as Staff</h3>
+                    <p class="">ផ្ទាំងទម្រង់បង្ហាញឡើង។ ត្រៀម Username, Password, និងអត្តលេខបុគ្គលិក</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Verify as Staff Blank Form" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag staff-tag">2 · Verify as Staff</span>
+                            <img src="image/photo_3_2026-10-14_12-22-35.jpg" alt="Verify as Staff Blank Form">
+                        </div>
+                    </div>
+                </li>
+
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">6C</span><svg class="icon" aria-hidden="true"><use href="#user"></use></svg></div>
+                    <h3 class="">បំពេញព័ត៌មានបុគ្គលិក</h3>
+                    <p class="">បំពេញ Username AD, Password, Employee ID (ឧ. 003178), BU (OFL), Function (ICT)</p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Verify as Staff Filled Form" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag staff-tag">3 · Input Info</span>
+                            <img src="image/photo_4_2026-10-14_12-22-35.jpg" alt="Verify as Staff Filled Form Example">
+                        </div>
+                    </div>
+                </li>
+
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">6D</span><svg class="icon" aria-hidden="true"><use href="#shield"></use></svg></div>
+                    <h3 class="">ស្នើសុំពិនិត្យ (Review)</h3>
+                    <p class="">ចុចបញ្ជូនសំណើ។ ប្រព័ន្ធបង្ហាញ <b>"Submitted for review"</b> រួចចុច <b>"Done"</b></p><span class="next" aria-hidden="true">→</span>
+                    <div class="visual-slot has-image" role="group" aria-label="Staff Activation Request Submitted" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag staff-tag">4 · Submitted</span>
+                            <img src="image/photo_5_2026-10-14_12-22-35.jpg" alt="Staff Activation Submitted for Review">
+                        </div>
+                    </div>
+                </li>
+
+                <li class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">6E</span><svg class="icon" aria-hidden="true"><use href="#check"></use></svg></div>
+                    <h3 class="">ស្ថានភាព Activated ✔</h3>
+                    <p class="">ក្រោយអនុម័ត ម៉ឺនុយនឹងបង្ហាញសញ្ញាធិក <b>✔ ពណ៌បៃតង</b> បញ្ជាក់ថា <b>Activated</b> ជោគជ័យ!</p>
+                    <div class="visual-slot has-image" role="group" aria-label="Status after Activation" bis_skin_checked="1">
+                        <div class="phone-preview-slot" bis_skin_checked="1">
+                            <span class="phone-badge-tag staff-tag-success">5 · Activated ✔</span>
+                            <img src="image/photo_6_2026-10-14_12-22-35.jpg" alt="Status after Activation Screen">
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </section>
+        <section class="section" aria-labelledby="confirm-title">
+            <div class="section-head" bis_skin_checked="1"><span class="section-no">03</span>
+                <div bis_skin_checked="1">
+                    <h2 id="confirm-title" class="">ពិនិត្យការបញ្ចុះតម្លៃ និងបញ្ជាក់ការកម្ម៉ង់</h2>
+                    <p class="">ផ្នែកទី ៣ · ជំហានទី ៧ ដល់ ៨</p>
+                </div>
+            </div>
+            <div class="finish" bis_skin_checked="1">
+                <article class="card">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">7</span></div>
+                    <div bis_skin_checked="1">
+                        <h3 class="">ពិនិត្យប្រូម៉ូសិន / ការបញ្ចុះតម្លៃ រួចបញ្ជាក់កម្ម៉ង់</h3>
+                        <p class="">ពិនិត្យមើលប្រូម៉ូសិន ឬការបញ្ចុះតម្លៃដែលមានសុពលភាព (ឧទាហរណ៍៖ <span
+                                class="discount">បញ្ចុះតម្លៃ 10% ឬ 40% សម្រាប់គ្រួសារ OML</span> ប្រសិនបើមាន)
+                            រួចចុចបញ្ជាក់ការកម្ម៉ង់ (Confirm Order)។</p>
+                    </div>
+                </article>
+                <article class="card success">
+                    <div class="card-top" bis_skin_checked="1"><span class="number">8</span></div>
+                    <div bis_skin_checked="1">
+                        <div class="success-icon" bis_skin_checked="1"><svg aria-hidden="true">
+                                <use href="#check"></use>
+                            </svg>ORDER SUBMITTED</div>
+                        <h3 class="">ការកម្ម៉ង់បានជោគជ័យ</h3>
+                        <p class="">ការកម្ម៉ង់របស់អ្នកបានបញ្ចូនរួចរាល់! បុគ្គលិកនឹងរៀបចំតាមលំដាប់
+                            និងជួយសម្រួលបន្ថែមតាមតម្រូវការរបស់អ្នក។</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+        <p class="visual-note" lang="en">All QR codes and screenshots in Section 1 are actual beta assets and scannable. To customize text, click "Edit content ✎" in the toolbar.</p>
+        <footer>
+            <div bis_skin_checked="1"><strong lang="en" class="">Download · Register · Enjoy at OMR!</strong>
+                <p class="">ត្រូវការជំនួយ? សាកសួរបុគ្គលិកនៅនឹងកន្លែងបានគ្រប់ពេល</p>
+            </div>
+            <p class="foot-meta"><svg aria-hidden="true">
+                    <use href="#pin"></use>
+                </svg><span>វ័នម៉រ ទួលគោក &amp; វ័នម៉រ បឹងកក់</span></p>
+        </footer>
+    </main>
+    <script>
+        document.querySelectorAll('.visual-slot').forEach(slot => {
+            const input = slot.querySelector('input');
+            slot.querySelector('button').onclick = () => input.click();
+            input.onchange = () => {const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => {let img = slot.querySelector('img'); if (!img) {img = document.createElement('img'); img.alt = slot.getAttribute('aria-label'); slot.append(img)} img.src = reader.result; slot.classList.add('has-image'); slot.querySelector('.placeholder-caption').hidden = true; input.value = ''}; reader.readAsDataURL(file)};
+        });
+        const pdfPrint = document.getElementById('pdf-print');
+        if (pdfPrint) pdfPrint.onclick = () => window.print();
+
+        const editButton = document.getElementById('edit');
+        const editSelector = 'h1,h2,h3,p,.brand-name,.mark,.hero-meta,.section-no,.number,.substep,.success-icon,footer strong,.mockup small,.mockup .app-logo,.mockup .btn,.mockup .toggle,.store-list span';
+        const editableFields = [...document.querySelectorAll(editSelector)].filter(el => !el.closest('.toolbar') && !el.parentElement.closest(editSelector));
+        function setEditing(enabled) {
+            document.body.classList.toggle('editing', enabled);
+            editButton.setAttribute('aria-pressed', String(enabled));
+            editButton.textContent = enabled ? 'Done editing ✓' : 'Edit content ✎';
+            editableFields.forEach(el => {if (enabled) {el.setAttribute('contenteditable', 'plaintext-only'); el.setAttribute('spellcheck', 'false')} else {el.removeAttribute('contenteditable'); el.removeAttribute('spellcheck')} });
+            // Use the same highlight in browsers that expose plaintext-only as the attribute value.
+            document.querySelectorAll('[contenteditable="plaintext-only"]').forEach(el => el.classList.toggle('editable-field', enabled));
+            if (!enabled) document.querySelectorAll('.editable-field').forEach(el => el.classList.remove('editable-field'));
+        }
+        editButton.onclick = () => setEditing(editButton.getAttribute('aria-pressed') !== 'true');
+        // Reset editor state when reopening a saved copy, while preserving its edited text.
+        setEditing(false);
+        document.getElementById('save').onclick = () => {
+            const copy = document.documentElement.cloneNode(true);
+            copy.querySelector('body').classList.remove('editing');
+            copy.querySelectorAll('[contenteditable]').forEach(el => {el.removeAttribute('contenteditable'); el.removeAttribute('spellcheck'); el.classList.remove('editable-field')});
+            const button = copy.querySelector('#edit');
+            if (button) {
+                button.setAttribute('aria-pressed', 'false');
+                button.textContent = 'Edit content ✎';
+            }
+            const html = '<!doctype html>\n' + copy.outerHTML;
+            try {
+                const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'omr-ordering-guide.html';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 1000);
+            } catch (err) {
+                const a = document.createElement('a');
+                a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+                a.download = 'omr-ordering-guide.html';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => document.body.removeChild(a), 1000);
+            }
+        };
+    </script>
+
+
+</body>
+
+</html>
